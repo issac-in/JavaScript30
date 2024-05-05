@@ -26,16 +26,56 @@
     ];
 
     // Some and Every Checks
-    // Array.prototype.some() // is at least one person 19 or older?
-    // Array.prototype.every() // is everyone 19 or older?
+    // 1. Array.prototype.some() // is at least one person 19 or older?
+    // Published video is 2017, assume 19 or older means before 1999
+    const ans1 = people.some(currentObject => (currentObject.year <= 1998));
+    console.log(`Is at least one person 19 or older: ${ans1}.`); // expect true
+    // 2. Array.prototype.every() // is everyone 19 or older?
+    const ans2 = people.every(currentObject => (currentObject.year <= 1998));
+    console.log(`Is everyone person 19 or older: ${ans2}.`); // expect: false
+
+    // Reference solution notes:
+    // Programmatically derives current year to calculate age better.
+    const ex1 = people.some(p => ((new Date().getFullYear()) - p.year) >= 19);
+    const ex2 = people.every(p => ((new Date().getFullYear()) - p.year) >= 19);
+    console.log(`At least one's 19+: ${ex1}.`);
+    console.log(`Everyone's 19+: ${ex2}.`);
 
     // Array.prototype.find()
     // Find is like filter, but instead returns just the one you are looking for
-    // find the comment with the ID of 823423
+    // 3. find the comment with the ID of 823423
+    const ans3 = comments.find(currentObject => (currentObject.id === 823423));
+    console.log(`Comment #823423 says: ${ans3.text}.`); // expect: "Super good"
 
     // Array.prototype.findIndex()
     // Find the comment with this ID
-    // delete the comment with the ID of 823423
+    // 4. delete the comment with the ID of 823423
+    // Depends - do we mutate original array, or return new array w/o it?
+    // 4A. No mutate - returning new array
+    const ans4a = comments.filter(currObject => (currObject.id !== 823423));
+    console.table(ans4a); // expect: absence of object w/ id 823423
+
+    // 4B. Yes mutate - return original array
+    const targetIndex = comments.findIndex(currObj => (currObj.id === 823423));
+    //delete comments[targetIndex]; // My solution
+    //comments.splice(targetIndex,1); // ref solution; mutate original array, no undefined holes - I like this approach a lot, assumed delete in instruction was a keyword to be used like findIndex()
+
+    // ref solution: no mutate of original array, returns new array w/o it
+    const newComments = [
+      ...comments.slice(0,targetIndex),
+      ...comments.slice(targetIndex + 1)
+    ];
+
+    console.table(newComments);
+    //console.table(comments); // expect: undefined in index 1 of comments array
+    //console.log(`${comments[1]}.`) // yep, its undefined there
+
+    // Difference between 4A & 4B
+    // 4A - Creates a new array, but no undefined holes in it.
+    // 4B - Returns original array, but it has an undefined hole in it.
+
+
+
 
   </script>
 </body>
