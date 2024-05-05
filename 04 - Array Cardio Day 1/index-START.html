@@ -36,31 +36,232 @@
       'Billings, Josh', 'Birrell, Augustine', 'Blair, Tony', 'Beecher, Henry', 'Biondo, Frank'
     ];
     
-    // Array.prototype.filter()
+    // Array.prototype.filter() - Doesn't mutate original array
     // 1. Filter the list of inventors for those who were born in the 1500's
+    function isBornIn1500s(object) {
+      return (object.year >= 1500 && object.year <= 1599);
+    }
+    const filteredInventors = inventors.filter(isBornIn1500s);
 
-    // Array.prototype.map()
+    // Array.prototype.map() - Doesn't mutate original array
     // 2. Give us an array of the inventors first and last names
+    function getFirstAndLastName(object) {
+      return `${object.first} ${object.last}`;
+    }
+    const mappedInventors = inventors.map(getFirstAndLastName);
 
-    // Array.prototype.sort()
+    // Array.prototype.sort() - DOES mutate original array
     // 3. Sort the inventors by birthdate, oldest to youngest
+    function byOldestToYoungest(objectA, objectB) {
+      if (objectA.year < objectB.year) {
+        return -1;
+      } else if (objectA.year > objectB.year) {
+        return 1;
+      } else {
+        return 0;
+      }
+    }
+    inventors.sort(byOldestToYoungest);
 
-    // Array.prototype.reduce()
+    // Array.prototype.reduce() - Doesn't mutate original array
     // 4. How many years did all the inventors live all together?
+    function byAccumulatingYears(accumulatedYears, currentObject) {
+        return accumulatedYears + (currentObject.passed - currentObject.year);
+    }
+    const reducedInventors = inventors.reduce(byAccumulatingYears, 0);
 
     // 5. Sort the inventors by years lived
+    // A. My approach - first, map an age property to all objects from inventors
+    function addAge(object) {
+      object.age = object.passed - object.year;
+      return object;
+    }
+    const addedAge = inventors.map(addAge);
+    // B. My approach - then, sort the objects by youngest to oldest
+    function byAge(objectA, objectB) { 
+      if (objectA.age < objectB.age) {
+        return -1;
+      } else if (objectA.age > objectB.age) {
+        return 1;
+      } else {
+        return 0;
+      }
+    }
+    addedAge.sort(byAge);
+    // Alternatively, just adjust byAge to do boolean expressions with passed
+    // and year properties directly, to skip adding an age property.
+    function byAgeV2(objectA, objectB) {
+      const ageA = objectA.passed - objectA.year;
+      const ageB = objectB.passed - objectB.year;
+      if (ageA < ageB) {
+        return -1;
+      } else if (ageA > ageB) {
+        return 1;
+      } else {
+        return 0;
+      }
+    }
+    inventors.sort(byAgeV2);
+    // Initial approach is O(2N) time, O(N) space
+    // Bottom approach is O(N) time, O(1) space 
+    // Just depends on if you wanted to mutate original array or not.
+    console.assert(
+      (inventors.map(getFirstAndLastName).join() === 
+        addedAge.map(getFirstAndLastName).join()),
+        "Expected these to have equal contents."
+    )
 
     // 6. create a list of Boulevards in Paris that contain 'de' anywhere in the name
     // https://en.wikipedia.org/wiki/Category:Boulevards_in_Paris
+    // Note: Assuming that the DOM was in your local access, no need to scrape.
+    // Test this code in the console of the wikipedia URL above. (It works)
+    const boulevards = [];
+    const boulevardNodeList = document.querySelectorAll(".mw-category a");
+    boulevardNodeList
+      .forEach((currentNode) => boulevards.push(currentNode.textContent));
+    boulevards
+      .filter((boulevard) => { 
+        return (boulevard.replace(" de ", " ") !== boulevard);
+      });
+    // Note: remember filter returns a new array, didn't actually uh keep
+    // that new array, oopsies.
 
+    // Reference Solution, slightly paraphrased
+    const linksArray = Array.from(document.querySelectorAll(".mw-category a"));
+    const refBoulevards = linksArray
+                            .map(link => link.textContent)
+                            .filter(streetName => streetName.includes(" de "));
 
     // 7. sort Exercise
     // Sort the people alphabetically by last name
+    // Initial Approach - Map then Sort
+    function splitLastFirstNames(str) {
+      return str.split(", ");
+    }
+    const mappedSplit = people.map(splitLastFirstNames);
+    function byLastNameAlphabetically(arrA, arrB) {
+      const lastNameA = arrA[0];
+      const lastNameB = arrB[0];
+      if (lastNameA < lastNameB) {
+        return -1;
+      } else if (lastNameA > lastNameB) {
+        return 1;
+      } else {
+        return 0;
+      }
+    }
+    mappedSplit.sort(byLastNameAlphabetically);
+
+    // Ref solution - just do it all in the sort wtff is this
+    // this is some javascript specific skullduggery
+    // I need to reawtch this solution wtf is this shit.
+    // also it entirely depends on what outputs you actually want as well.
+    const alpha = people.sort(function(lastOne, nextOne) {
+      // Utilizing destructuring assignment syntax
+      // Assign alast and aFirst accordingly to the split of the people strings
+      // and blast and bfirst as well
+
+      // then based on the results of the last names
+      // if alast name before blast, then 1
+      // else just put alast after blast.
+      const [aLast, aFirst] = lastOne.split(", ");
+      const [bLast, bFirst] = nextOne.split(", ");
+      return aLast > bLast ? 1 : -1; 
+    });
 
     // 8. Reduce Exercise
     // Sum up the instances of each of these
     const data = ['car', 'car', 'truck', 'truck', 'bike', 'walk', 'car', 'van', 'bike', 'walk', 'car', 'van', 'car', 'truck' ];
+    // Assuming you mean, find the frequency of each mentioned word
+    // Why would I even reduce, here?
+    // Reduce only returns a single accumulator, that's lame.
+    // Wouldn't I want something like an output of
+    // output example: [[car, 5], [truck, 3], [bike, 2], [walk, 2], [van, 2]]
+    function initialIdea(data) {
+      const outputArray = []; // create outputArray
+      for (let i = 0; i < data.length; i++) { // Iterate through data
+        let word = data[i]; // initialize word w/ start value data[i]
+        let freq = 1; // initialize freq w/ start value 1
+        // If outputArray is empty, push data's 1st index as value w/ freq 1
+        if (outputArray.length === 0) { outputArray.push([word, freq]); }
+        // Else
+        else {
+          // initialize notFoundInOutputArray w/ start value true;
+          let notFoundInOutputArray = true;
+          // iterate through output 2D array
+          for (let oi = 0; oi < outputArray.length; oi++) {
+            // If word is in output array
+            if (outputArray[oi][0] === word) {
+              // increment the value by freq
+              outputArray[oi][1] += freq;
+              notFoundInOutputArray = false;
+              break;
+            }
+          }
+          // If word is not in output array
+          if (notFoundInOutputArray) {
+            // then push the word and frequency to output array
+            outputArray.push([word, freq]);
+          }
+        } 
+      }
+      return outputArray;
+    }
+    function testInitialIdea() {
+      const answer = [
+        ["car", 5], ["truck", 3], ["bike", 2], ["walk", 2], ["van", 2]
+      ];
+      console.log(
+        `Does test pass: ${answer.join() == initialIdea(data).join()}`
+      );
+    }
+    // that's no different from my initial approach
+    //testInitialIdea();
 
+    // A simpler approach to the output is not a 2D array, but a single object
+    // A single object, that holds as many properties as unique words
+    // In a sense, a single object is a single value, so reduce works here.
+
+    function reduceIdea(accumulatedObject, currentData) {
+      // if undefined key, then add key to accumulated object
+      if (!accumulatedObject[currentData]) {
+        accumulatedObject[currentData] = 0;
+      }
+      // now by this, we're certain the key exists, so
+      // if we encounter it, increase its frequency by one
+      accumulatedObject[currentData] += 1;
+      return accumulatedObject;
+    }
+    
+    function testReduceIdea() {
+      const answer = {
+        car: 5,
+        truck: 3,
+        bike: 2,
+        walk: 2,
+        van: 2,
+      };
+      console.table(answer);
+      console.table(data.reduce(reduceIdea, {}));
+    }
+    testReduceIdea();
+
+
+
+
+
+
+
+
+
+
+
+    // Reference solution
+    const transportation = data.reduce(function(obj, item) {
+      if(!obj[item]) { obj[item] = 0; }
+      obj[item]++;
+      return obj;
+    },{});
   </script>
 </body>
 </html>
